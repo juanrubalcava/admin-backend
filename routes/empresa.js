@@ -1,4 +1,6 @@
 var express = require('express');
+var fs = require('fs');
+
 var SEED = require('../config/config').SEED;
 
 var mdAutenticacion = require('../middlewares/autenticacion');
@@ -11,14 +13,14 @@ var Empresa = require('../models/empresa');
 // Obtener todos las empresas
 //===========================
 
-app.get('/', (req, res, next) => {
+app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
 
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
     Empresa.find({})
         .skip(desde)
-        .limit(5)
+        // .limit(5)
         .populate('usuario', 'nombre email')
         .exec(
             (err, empresas) => {
@@ -160,6 +162,12 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 mensaje: 'No existe una empresa con ese ID',
                 errors: { message: 'No existe una empresa con ese ID' }
             });
+        }
+
+        // Si existe elimina la imagen
+        var pathViejo = './uploads/empresas/' + empresaBorrado.img;
+        if (fs.existsSync(pathViejo)) {
+            fs.unlinkSync(pathViejo);
         }
 
         res.status(200).json({

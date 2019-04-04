@@ -140,20 +140,20 @@ function subirPorTipo(tipo, id, nombreArchivo, res) {
                 });
             }
 
-            var pathViejo = './uploads/empresas/' + empresa.file;
+            var pathViejo = './uploads/empresas/' + empresa.img;
 
             // Si existe elimina la imagen anterior
             if (fs.existsSync(pathViejo)) {
                 fs.unlinkSync(pathViejo);
             }
 
-            proyecto.file = nombreArchivo;
+            empresa.img = nombreArchivo;
 
-            proyecto.save((err, empresaActualizado) => {
+            empresa.save((err, empresaActualizado) => {
                 return res.status(200).json({
                     ok: true,
                     mensaje: 'Imagen de Empresa actualizada',
-                    usuario: empresaActualizado,
+                    empresa: empresaActualizado,
                     pathViejo: pathViejo
                 });
 

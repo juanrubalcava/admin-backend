@@ -1,33 +1,37 @@
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-var SEED = require('../config/config').SEED;
-
+const SEED = require('../config/config').SEED;
 
 
 //=============================
 // verificar token
 //=============================
 
-exports.verificaToken = function(req, res, next) {
+exports.verificaToken = function (req, res, next) {
+    let token = req.query.token || req.headers['x-access-token'] || req.headers['authorization'];
 
-
-    var token = req.query.token;
-
-    jwt.verify(token, SEED, (err, decoded) => {
-
-        if (err) {
-            return res.status(401).json({
-                ok: false,
-                mensaje: 'token no valido',
-                errors: err
-            });
+    if (token) {
+        if (token.startsWith('Bearer ')) {
+            // Remove Bearer from string
+            token = token.slice(7, token.length);
         }
 
-        req.usuario = decoded.usuario;
-
-        next();
-
-
-    });
+        jwt.verify(token, SEED, (err, decoded) => {
+            if (err) {
+                return res.status(401).json({
+                    ok: false,
+                    mensaje: 'Token no valido',
+                    errors: err
+                });
+            }
+            req.usuario = decoded.usuario;
+            next();
+        });
+    } else {
+        return res.status(401).json({
+            success: false,
+            message: 'Token no proporcionado'
+        });
+    }
 
 }
