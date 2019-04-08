@@ -25,6 +25,7 @@ var appRoutes = require('./routes/app');
 var usuarioRoutes = require('./routes/usuario');
 var loginRoutes = require('./routes/login');
 var empresaRoutes = require('./routes/empresa');
+var alumnosRoutes = require('./routes/alumnos');
 var reporteRoutes = require('./routes/reporte');
 var busquedaRoutes = require('./routes/busqueda');
 var uploadRoutes = require('./routes/upload');
@@ -41,6 +42,7 @@ mongoose.connection.openUri('mongodb://localhost:27017/projectosDB', (err, res) 
 // Rutas
 app.use('/usuario', usuarioRoutes);
 app.use('/empresas', empresaRoutes);
+app.use('/alumnos', alumnosRoutes);
 app.use('/reporte', reporteRoutes);
 app.use('/login', loginRoutes);
 app.use('/busqueda', busquedaRoutes);

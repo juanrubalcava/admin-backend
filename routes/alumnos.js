@@ -7,208 +7,160 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
 
-var Empresa = require('../models/empresa');
+var Alumno = require('../models/alumno');
 
-//===========================
-// Obtener todos las empresas
-//===========================
 
 app.get('/', mdAutenticacion.verificaToken, (req, res, next) => {
+    // var desde = req.query.desde || 0;
+    // desde = Number(desde);
 
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-
-    Empresa.find({})
-        .skip(desde)
-        // .limit(5)
-        .populate('usuario', 'nombre email')
+    Alumno.find({})
+        // .skip(desde)
+        // // .limit(5)
+        // .populate('usuario', 'nombre email')
         .exec(
-            (err, empresas) => {
-
+            (err, alumnos) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando empresas',
+                        mensaje: 'Error cargando alumnos',
                         errors: err
                     });
                 }
 
-                Empresa.count({}, (err, conteo) => {
-
+                Alumno.count({}, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        empresas: empresas,
+                        alumnos: alumnos,
                         total: conteo
                     });
-
-                })
-
-
-            })
-
+                });
+            });
 });
 
 app.get('/:id', mdAutenticacion.verificaToken, (req, res) => {
     var id = req.params.id;
-    Empresa.findById(id, (err, empresa) => {
+    Alumno.findById(id, (err, alumno) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar empresa',
+                mensaje: 'Error al buscar alumno',
                 errors: err
             });
         }
 
-        if (!empresa) {
+        if (!alumno) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'La empresa con el id ' + id + ' no existe',
+                mensaje: 'El alumno con el id ' + id + ' no existe',
                 errors: {
-                    message: 'No existe una empresa con ese ID'
+                    message: 'No existe un alumno con ese ID'
                 }
             });
         }
 
         res.status(200).json({
             ok: true,
-            empresa: empresa
+            alumno: alumno
         });
     });
 });
 
-
-
-
-//=============================
-// Actualizar una empresa
-//=============================
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
     var body = req.body;
 
-    Empresa.findById(id, (err, empresa) => {
-
-
+    Alumno.findById(id, (err, alumno) => {
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar empresa',
+                mensaje: 'Error al buscar alumno',
                 errors: err
             });
         }
 
-        if (!empresa) {
+        if (!alumno) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'la empresa con el id ' + id + ' no existe',
+                mensaje: 'El alumno con el id ' + id + ' no existe',
                 errors: {
-                    message: 'no existe una empresa con ese ID'
+                    message: 'No existe un alumno con ese ID'
                 }
             });
         }
 
-        empresa.nombre = body.nombre;
-        empresa.usuario = req.usuario._id;
+        alumno.nombre = body.nombre;
+        alumno.email = body.email;
+        alumno.telefono = body.telefono;
+        alumno.usuario = req.usuario._id;
 
-        empresa.save((err, empresaGuardado) => {
-
+        alumno.save((err, alumnoGuardado) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'Error al actualizar empresa',
+                    mensaje: 'Error al actualizar alumno',
                     errors: err
                 });
             }
 
-
             res.status(200).json({
                 ok: true,
-                empresa: empresaGuardado
+                alumno: alumnoGuardado
             });
-
         });
-
     });
-
 });
 
-
-
-
-//=============================
-// Creacion de una nueva empresa
-//=============================
-
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
     var body = req.body;
-
-    var empresa = new Empresa({
+    var alumno = new Alumno({
         nombre: body.nombre,
+        email: body.email,
+        telefono: body.telefono,
         usuario: req.usuario._id
     });
 
-    empresa.save((err, empresaGuardado) => {
-
+    alumno.save((err, alumnoGuardado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'Error al crear empresa',
+                mensaje: 'Error al crear alumno',
                 errors: err
             });
         }
         res.status(201).json({
             ok: true,
-            empresa: empresaGuardado
+            alumno: alumnoGuardado
         });
-
     });
-
-
-
 });
 
-//=============================
-// Borrar una empresa por el id
-//=============================
-
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
-    Empresa.findByIdAndDelete(id, (err, empresaBorrado) => {
-
+    Alumno.findByIdAndDelete(id, (err, alumnoBorrado) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'Error al borrar empresa',
+                mensaje: 'Error al borrar alumno',
                 errors: err
             });
         }
 
-        if (!empresaBorrado) {
+        if (!alumnoBorrado) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'No existe una empresa con ese ID',
+                mensaje: 'No existe un alumno con ese ID',
                 errors: {
-                    message: 'No existe una empresa con ese ID'
+                    message: 'No existe un alumno con ese ID'
                 }
             });
         }
 
-        // Si existe elimina la imagen
-        var pathViejo = './uploads/empresas/' + empresaBorrado.img;
-        if (fs.existsSync(pathViejo)) {
-            fs.unlinkSync(pathViejo);
-        }
-
         res.status(200).json({
             ok: true,
-            empresa: empresaBorrado
+            alumno: alumnoBorrado
         });
-
-
     });
-
 });
+
 module.exports = app;
